@@ -32,10 +32,10 @@ The project demonstrates that tailored EEG processing pipelines can significantl
 
 ## Authors:
 
-- Adolfo Hernández                
-- Roberto Morales
-- José Emilio Inzunza             
-- Esteban Ochoa
-- Esteban Muñoz 
-- Alonso Rivera
-- Isabella Hurtado
+- Adolfo Hernández.            
+- Roberto Morales.
+- José Emilio Inzunza.             
+- Esteban Ochoa.
+- Esteban Muñoz.
+- Alonso Rivera.
+- Isabella Hurtado.
