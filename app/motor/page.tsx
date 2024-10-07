@@ -188,7 +188,7 @@ export default function Motor() {
             }
             {/* Chart for Right Hand */}
             {rightHandData.length > 0 && (
-                <div className="w-full max-w-lg mt-8">
+                <div className="w-full max-w-full min-w-full mt-8">
                     <h2 className="text-center mb-4 font-semibold text-xl">Right Hand Probability</h2>
                     <Line data={rightHandChartData} />
                 </div>
@@ -196,7 +196,7 @@ export default function Motor() {
 
             {/* Chart for Left Hand */}
             {leftHandData.length > 0 && (
-                <div className="w-full max-w-lg mt-8">
+                <div className="w-full max-w-full min-w-full mt-8">
                     <h2 className="text-center mb-4 font-semibold text-xl">Left Hand Probability</h2>
                     <Line data={leftHandChartData} />
                 </div>
