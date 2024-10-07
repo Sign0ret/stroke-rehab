@@ -63,12 +63,26 @@ export default function Motor() {
 
             const data = await response.json();
             console.log("Server response:", data);
+             const svmLeftHandProbabilities = data.svm_left_hand_probabilities;
+            const svmRightHandProbabilities = data.svm_right_hand_probabilities;
+
+             // Now you can log them or use them as needed
+            console.log("SVM Left Hand Probabilities:", svmLeftHandProbabilities);
+            console.log("SVM Right Hand Probabilities:", svmRightHandProbabilities);
+            setIsLoading(false);
+
+            return [svmLeftHandProbabilities, svmRightHandProbabilities];
             // You can handle the response here (e.g., display the results to the user)
         } catch (error) {
             console.error("Error:", error);
         }
         setIsLoading(false);
+
+
+
     };
+
+
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24 bg-white text-black">
