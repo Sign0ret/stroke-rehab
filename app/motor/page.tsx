@@ -9,7 +9,8 @@ export default function Motor() {
     const [mode, setMode] = useState<string>("pre-rehab");
     const [selectedTrainFile, setSelectedTrainFile] = useState<File | null>(null);
     const [selectedTestFile, setSelectedTestFile] = useState<File | null>(null);
-
+    const [isLoading, setIsLoading] = useState<Boolean>(false);
+    
     // Function to handle file selection from FileUpload component
     const handleTrainFileChange = (files: File[]) => {
         if (files.length > 0) {
@@ -99,7 +100,7 @@ export default function Motor() {
             </div>
 
             {/* Button to submit */}
-            <Button variant="default" className="" onClick={handleSubmit}>
+            <Button variant="default" className="" onClick={handleSubmit} disabled={isLoading}>
                 Get Results
             </Button>
         </main>
