@@ -176,12 +176,12 @@ export default function Motor() {
             </Button>
 
             {accuracy && (
-                <div className="py-5 justify-center items-center">
-                    <Label>
+                <div className="py-5 justify-center items-center gap-4">
+                    <Label className="pr-4">
                         Model with an Accuracy of
                     </Label>
                     <Badge>
-                        {accuracy}
+                        {parseFloat(accuracy.toFixed(2))}%
                     </Badge>
                 </div>
             )

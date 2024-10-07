@@ -188,6 +188,7 @@ async def evaluate(trainfile: UploadFile = File(...), testfile: UploadFile = Fil
                       f"SVM -> Right Hand: {right_hand_prob_svm[i]:.2f}%, Left Hand: {left_hand_prob_svm[i]:.2f}%")
 
             # Return LDA and SVM accuracies and hand probabilities
+            print(svm_accuracy)
             return {
                 "message": "File received successfully",
                 "mode": mode,

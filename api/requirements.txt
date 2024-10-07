@@ -3,5 +3,4 @@ uvicorn
 scipy
 numpy
 scikit-learn
-python-multipart
-
+python-multipart    
