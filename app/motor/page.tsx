@@ -9,8 +9,8 @@ export default function Motor() {
     const [mode, setMode] = useState<string>("pre-rehab");
     const [selectedTrainFile, setSelectedTrainFile] = useState<File | null>(null);
     const [selectedTestFile, setSelectedTestFile] = useState<File | null>(null);
-    const [isLoading, setIsLoading] = useState<Boolean>(false);
-    
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     // Function to handle file selection from FileUpload component
     const handleTrainFileChange = (files: File[]) => {
         if (files.length > 0) {
@@ -31,6 +31,7 @@ export default function Motor() {
 
     // Handle form submission and POST request to FastAPI endpoint
     const handleSubmit = async () => {
+        setIsLoading(true);
         if (!selectedTrainFile) {
             alert("Please upload a train file before submitting.");
             return;
@@ -66,6 +67,7 @@ export default function Motor() {
         } catch (error) {
             console.error("Error:", error);
         }
+        setIsLoading(false);
     };
 
     return (
