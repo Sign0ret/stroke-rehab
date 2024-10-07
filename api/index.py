@@ -4,11 +4,9 @@ import os
 import scipy.io
 import numpy as np
 from scipy.signal import butter, filtfilt
-from scipy.linalg import eigh
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from io import BytesIO
-from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import traceback  # To print the full stack trace in case of errors
@@ -29,7 +27,7 @@ app.add_middleware(
 )
 
 @app.post("/api/py/evaluate")
-async def evaluate(trainfile: UploadFile = File(...),  testfile: UploadFile = File(...), mode: str = Form(...)):
+async def evaluate(trainfile: UploadFile = File(...), testfile: UploadFile = File(...), mode: str = Form(...)):
     try:
         trainfile_contents = await trainfile.read()  # Read the file's content
         testfile_contents = await testfile.read()  # Read the file's content
@@ -131,22 +129,26 @@ async def evaluate(trainfile: UploadFile = File(...),  testfile: UploadFile = Fi
                 lda = LinearDiscriminantAnalysis()
                 lda.fit(segments_train, labels_train)
 
-                # Predict probabilities for test set using LDA
+                # Predict probabilities and labels for test set using LDA
                 test_probabilities_lda = lda.predict_proba(segments_test)
+                lda_predictions = lda.predict(segments_test)
                 right_hand_prob_lda = test_probabilities_lda[:, 0] * 100  # Probability of right hand
                 left_hand_prob_lda = test_probabilities_lda[:, 1] * 100   # Probability of left hand
+                lda_accuracy = accuracy_score(labels_test, lda_predictions) * 100  # LDA accuracy
 
                 # SVM model
                 svm = SVC(kernel='rbf', C=1, gamma='scale', probability=True)
                 svm.fit(segments_train, labels_train)
 
-                # Predict probabilities for test set using SVM
+                # Predict probabilities and labels for test set using SVM
                 svm_probabilities = svm.predict_proba(segments_test)
+                svm_predictions = svm.predict(segments_test)
                 right_hand_prob_svm = svm_probabilities[:, 0] * 100  # Probability of right hand
                 left_hand_prob_svm = svm_probabilities[:, 1] * 100   # Probability of left hand
+                svm_accuracy = accuracy_score(labels_test, svm_predictions) * 100  # SVM accuracy
 
-                # Return both models' probabilities for further usage
-                return right_hand_prob_lda, left_hand_prob_lda, right_hand_prob_svm, left_hand_prob_svm
+                # Return both models' probabilities and accuracies
+                return right_hand_prob_lda, left_hand_prob_lda, lda_accuracy, right_hand_prob_svm, left_hand_prob_svm, svm_accuracy
         except Exception as e:
             print(f"Error training and evaluating LDA and SVM models: {e}")
             print(traceback.format_exc())
@@ -168,8 +170,9 @@ async def evaluate(trainfile: UploadFile = File(...),  testfile: UploadFile = Fi
             # Standardize the data
             segments_train_scaled, segments_test_scaled = standardize_data(segments_train, segments_test)
 
-            # Evaluate LDA and SVM probabilities
-            right_hand_prob_lda, left_hand_prob_lda, right_hand_prob_svm, left_hand_prob_svm = lda_svm_evaluation(segments_train_scaled, labels_train, segments_test_scaled, labels_test)
+            # Evaluate LDA and SVM probabilities and accuracies
+            right_hand_prob_lda, left_hand_prob_lda, lda_accuracy, right_hand_prob_svm, left_hand_prob_svm, svm_accuracy = lda_svm_evaluation(
+                segments_train_scaled, labels_train, segments_test_scaled, labels_test)
         except Exception as e:
             print(f"Error in the evaluation process: {e}")
             print(traceback.format_exc())
@@ -184,6 +187,7 @@ async def evaluate(trainfile: UploadFile = File(...),  testfile: UploadFile = Fi
                 print(f"Segment {i+1}: LDA -> Right Hand: {right_hand_prob_lda[i]:.2f}%, Left Hand: {left_hand_prob_lda[i]:.2f}% | "
                       f"SVM -> Right Hand: {right_hand_prob_svm[i]:.2f}%, Left Hand: {left_hand_prob_svm[i]:.2f}%")
 
+            # Return LDA and SVM accuracies and hand probabilities
             return {
                 "message": "File received successfully",
                 "mode": mode,
@@ -191,8 +195,10 @@ async def evaluate(trainfile: UploadFile = File(...),  testfile: UploadFile = Fi
                 "testfilename": testfile.filename,
                 "lda_right_hand_probabilities": right_hand_prob_lda.tolist(),
                 "lda_left_hand_probabilities": left_hand_prob_lda.tolist(),
+                "lda_accuracy": lda_accuracy,
                 "svm_right_hand_probabilities": right_hand_prob_svm.tolist(),
                 "svm_left_hand_probabilities": left_hand_prob_svm.tolist(),
+                "svm_accuracy": svm_accuracy
             }
         except Exception as e:
             print(f"Error processing and returning results: {e}")

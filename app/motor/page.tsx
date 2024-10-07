@@ -4,12 +4,40 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
+import { Line } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale, // Import the CategoryScale for the x-axis
+    LinearScale,   // Import the LinearScale for the y-axis
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';  // Auto-imports for Line charts
+import { Badge } from "@/components/ui/badge"
+
+// Register the required components and scales
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 export default function Motor() {
     const [mode, setMode] = useState<string>("pre-rehab");
     const [selectedTrainFile, setSelectedTrainFile] = useState<File | null>(null);
     const [selectedTestFile, setSelectedTestFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const [leftHandData, setLeftHandData] = useState<number[]>([]);
+    const [rightHandData, setRightHandData] = useState<number[]>([]);
+    const [timeData, setTimeData] = useState<number[]>([]); // Time data
+    const [accuracy, setAccuracy] = useState<number>();
 
     // Function to handle file selection from FileUpload component
     const handleTrainFileChange = (files: File[]) => {
@@ -63,12 +91,18 @@ export default function Motor() {
 
             const data = await response.json();
             console.log("Server response:", data);
-             const svmLeftHandProbabilities = data.svm_left_hand_probabilities;
+            const svmLeftHandProbabilities = data.svm_left_hand_probabilities;
             const svmRightHandProbabilities = data.svm_right_hand_probabilities;
+            const svmAccuracy: number = data.svm_accuracy;
 
-             // Now you can log them or use them as needed
+            // Now you can log them or use them as needed
             console.log("SVM Left Hand Probabilities:", svmLeftHandProbabilities);
             console.log("SVM Right Hand Probabilities:", svmRightHandProbabilities);
+
+            setLeftHandData(svmLeftHandProbabilities);
+            setRightHandData(svmRightHandProbabilities);
+            setTimeData(Array.from({ length: svmLeftHandProbabilities.length }, (_, i) => i));  // Simulate time axis
+            setAccuracy(svmAccuracy)
             setIsLoading(false);
 
             return [svmLeftHandProbabilities, svmRightHandProbabilities];
@@ -77,12 +111,33 @@ export default function Motor() {
             console.error("Error:", error);
         }
         setIsLoading(false);
-
-
-
     };
 
+    // Set up the chart data for the right hand
+    const rightHandChartData = {
+        labels: timeData,
+        datasets: [
+            {
+                label: "Right Hand Probability",
+                data: rightHandData,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            },
+        ],
+    };
 
+    // Set up the chart data for the left hand
+    const leftHandChartData = {
+        labels: timeData,
+        datasets: [
+            {
+                label: "Left Hand Probability",
+                data: leftHandData,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            },
+        ],
+    };
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24 bg-white text-black">
@@ -119,6 +174,33 @@ export default function Motor() {
             <Button variant="default" className="" onClick={handleSubmit} disabled={isLoading}>
                 Get Results
             </Button>
+
+            {accuracy && (
+                <div className="py-5 justify-center items-center">
+                    <Label>
+                        Model with an Accuracy of
+                    </Label>
+                    <Badge>
+                        {accuracy}
+                    </Badge>
+                </div>
+            )
+            }
+            {/* Chart for Right Hand */}
+            {rightHandData.length > 0 && (
+                <div className="w-full max-w-lg mt-8">
+                    <h2 className="text-center mb-4 font-semibold text-xl">Right Hand Probability</h2>
+                    <Line data={rightHandChartData} />
+                </div>
+            )}
+
+            {/* Chart for Left Hand */}
+            {leftHandData.length > 0 && (
+                <div className="w-full max-w-lg mt-8">
+                    <h2 className="text-center mb-4 font-semibold text-xl">Left Hand Probability</h2>
+                    <Line data={leftHandChartData} />
+                </div>
+            )}
         </main>
     );
 }
