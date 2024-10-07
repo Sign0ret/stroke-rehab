@@ -25,6 +25,11 @@ The output includes classification results, such as accuracy, precision, and rec
 ## Results
 The project demonstrates that tailored EEG processing pipelines can significantly improve motor imagery detection in stroke patients. By using advanced filtering, CSP, and classifiers, the accuracy of detecting arm movements based on EEG signals improved across multiple datasets.
 
+## Tech Stack
+- Model: scipy, numpy, scikit-learn, python-multipart.
+- Data Science Algorithms: CSP + SVM, CSP + VTLDA.
+- Frontend: fastapi, nextjs
+
 ## Authors:
 
 - Adolfo Hernández                
